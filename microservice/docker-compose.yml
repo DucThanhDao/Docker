@@ -11,6 +11,17 @@ services:
       - VITE_APP_PORT=5000
     networks:
       - microservice_public
+  backend:
+    build:
+      context: ./express-app
+    image: express-app
+    container_name: express-app
+    ports:
+      - "9000:9000"
+    environment:
+      - APP_PORT=9000
+    networks:
+      - microservice_public
 networks:
   microservice_public:
     driver: bridge
