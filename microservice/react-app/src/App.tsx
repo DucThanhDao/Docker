@@ -1,10 +1,38 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
+interface ApiResponse {
+  message: string; // Adjust based on actual API response
+}
+const API_URL = import.meta.env.VITE_EXPRESS_BE_URL || "http://backend:9000"; // Default for local dev
+console.log("-------------------", API_URL);
 function App() {
   const [count, setCount] = useState(0)
+  const [data, setData] = useState<ApiResponse | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`${API_URL}/cart`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const result: ApiResponse = await response.json();
+        setData(result);
+      } catch (err) {
+        console.log(err);
+        setError((err as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []); // Empty dependency array -> runs only on mount
 
   return (
     <>
@@ -21,9 +49,10 @@ function App() {
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
         </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+        <h2>API Data</h2>
+        {loading && <p>Loading...</p>}
+        {error && <p style={{ color: "red" }}>Error: {error}</p>}
+        {data && <p>Response: {data.message}</p>}
       </div>
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more

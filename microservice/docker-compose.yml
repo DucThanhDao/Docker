@@ -1,6 +1,8 @@
 version: "3"
 services:
   frontend:
+    depends_on:
+      - backend
     build:
       context: ./react-app
     image: react-app
@@ -9,21 +11,26 @@ services:
       - "5000:5000"
     environment:
       - VITE_APP_PORT=5000
+      - VITE_EXPRESS_BE_URL=http://backend:9000
     networks:
-      - microservice_public
+      - private
+      - public
   backend:
     build:
       context: ./express-app
     image: express-app
     container_name: express-app
-    ports:
-      - "9000:9000"
     environment:
       - APP_PORT=9000
     networks:
-      - microservice_public
+      - private
+    expose:
+      - 9000
+    # ports:
+    #   - "9000:9000"
 networks:
-  microservice_public:
+  public:
     driver: bridge
-  microservice_private:
-    driver: none
+  private:
+    driver: bridge
+    internal: true
